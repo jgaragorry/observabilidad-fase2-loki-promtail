@@ -22,6 +22,11 @@
 *.xml
 *.html
 
+# ✅ Incluir dashboards y datasources
+!grafana/dashboards/**/*.json
+!grafana/provisioning/**/*.yml
+
+
 # 🐍 Python
 __pycache__/
 *.py[cod]
