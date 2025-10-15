@@ -76,10 +76,3 @@ Guías paso a paso, explicaciones de cada archivo, troubleshooting y preguntas f
 “Es como tener un manual del laboratorio que no solo te dice qué hacer, sino también por qué y cómo explicarlo.”
 
 ---
-
-## 🧠 Sugerencia para clases
-
-Puedes usar este archivo como base para responder preguntas frecuentes, preparar presentaciones, o reforzar conceptos clave durante el laboratorio.  
-También puedes convertir cada sección en una slide o ficha visual para tus alumnos.
-
-
