@@ -37,7 +37,7 @@ Incluye estructura del repositorio, explicación de cada archivo, pasos para eje
 
 | Fase | Tecnología | Enlace |
 |------|------------|--------|
-| 1 | Prometheus + Grafana (métricas) | [Ver repositorio](https://www.tiktok.com/@softtraincorp/video/7561234582427684107?is_from_webapp=1&sender_device=pc&web_id=7548492986058294840) |
+| 1 | Prometheus + Grafana (métricas) | [Ver repositorio](https://github.com/jgaragorry/observabilidad-basica-prometheus-grafana) |
 | 2 | Loki + Promtail (logs) | ✅ Estás aquí |
 | 3 | Node Exporter (sistema) | *Próximamente* |
 | 4 | Alertmanager (alertas) | *Próximamente* |
