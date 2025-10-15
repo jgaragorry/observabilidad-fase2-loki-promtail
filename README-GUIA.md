@@ -1,217 +1,155 @@
-# 📘 Guía técnica – Observabilidad Fase 2: Logs con Loki + Promtail
+# 🧪 Guía de Uso – Observabilidad Fase 2 con Grafana, Loki y Promtail
 
-Este laboratorio enseña cómo recolectar y visualizar logs del sistema en tiempo real usando Loki, Promtail y Grafana. Es la segunda fase de una serie didáctica orientada a DevOps, SRE, SysOps y observabilidad moderna.
+Este repositorio contiene un laboratorio didáctico para enseñar cómo recolectar, almacenar y visualizar logs usando Promtail, Loki y Grafana. Está diseñado para ser reproducible, modular y fácil de extender.
 
 ---
 
-## 🧱 Estructura del repositorio
+## 📦 Estructura del Proyecto
 
 ```
 observabilidad-fase2-loki-promtail/
-├── docker-compose.yml
-├── loki/config.yml
-├── promtail/config.yml
 ├── grafana/
-│   ├── dashboards/fase2/
-│   │   └── logs-basicos.json
-│   │   └── logs-extendidos.json
+│   ├── dashboards/
+│   │   └── fase2/
+│   │       ├── logs-basicos.json
+│   │       └── logs-extendidos.json
 │   └── provisioning/
-│       ├── dashboards/dashboards.yml
-│       └── datasources/datasources.yml
+│       ├── dashboards/
+│       │   └── dashboards.yml
+│       └── datasources/
+│           └── datasources.yml
+├── loki/
+│   └── config.yml
+├── promtail/
+│   └── config.yml
 ├── scripts/
 │   ├── reset.sh
 │   └── setup.sh
-├── docs/
-│   ├── arquitectura.md
-│   ├── troubleshooting.md
-│   └── preguntas-frecuentes.md
-├── assets/capturas/
-│   └── flujo-loki-promtail-grafana.png
-├── .gitignore
-└── README-GUIA.md
+├── docker-compose.yml
+├── README.md
+├── README-GUIA.md
+└── docs/
+    ├── arquitectura.md
+    ├── troubleshooting.md
+    └── preguntas-frecuentes.md
 ```
 
 ---
 
-## 🎯 Objetivo del laboratorio
-
-- Recolectar logs del sistema con Promtail
-- Almacenarlos en Loki
-- Visualizarlos automáticamente en Grafana
-- Enseñar trazabilidad, filtrado y análisis de eventos
-
----
-
-## 🚀 ¿Cómo ejecutar el laboratorio?
+## 🚀 Cómo ejecutar el laboratorio
 
 1. Clona el repositorio:
-
    ```bash
-   git clone https://github.com/tuusuario/observabilidad-fase2-loki-promtail.git
+   git clone https://github.com/jgaragorry/observabilidad-fase2-loki-promtail.git
    cd observabilidad-fase2-loki-promtail
    ```
 
-2. Reinicia el entorno limpio:
-
+2. Reinicia el entorno (opcional):
    ```bash
    ./scripts/reset.sh
    ```
 
-3. Valida que todo esté funcionando:
-
+3. Levanta los servicios:
    ```bash
    ./scripts/setup.sh
    ```
 
 4. Accede a Grafana:
-
    ```
    http://localhost:3000
    Usuario: admin
    Contraseña: admin
    ```
 
-5. Ve a **Dashboards → Browse → Logs – Fase 2**  
-   Abre el dashboard “Logs Básicos – Fase 2” o “Logs Extendidos – Fase 2”
+---
+
+## 📊 Dashboards disponibles
+
+- `Logs Básicos – Fase 2`: muestra logs recientes, por nivel (`error`, `warn`, `info`) y por archivo.
+- `Logs Extendidos – Fase 2`: incluye visualizaciones por servicio (`job`), logs que contienen `"failed"`, frecuencia por timestamp, y paneles tipo `piechart` y `table`.
 
 ---
 
-## 🔧 ¿Qué hace cada archivo?
+## 🧭 Flujo de Carga y Lectura de Archivos
 
-| Archivo | Propósito |
-|--------|-----------|
-| `docker-compose.yml` | Define los servicios Loki, Promtail y Grafana |
-| `loki/config.yml` | Configura Loki para almacenamiento local |
-| `promtail/config.yml` | Indica a Promtail qué logs leer y a dónde enviarlos |
-| `logs-basicos.json` | Dashboard con 3 paneles básicos de logs |
-| `logs-extendidos.json` | Dashboard con 6 paneles para trazabilidad avanzada |
-| `datasources.yml` | Provisiona Loki como datasource en Grafana |
-| `dashboards.yml` | Carga automáticamente los dashboards en Grafana |
-| `reset.sh` | Reinicia el entorno desde cero |
-| `setup.sh` | Valida que todo esté funcionando correctamente |
+Este bloque explica qué hace cada archivo de configuración del laboratorio, cómo se relacionan entre sí, y en qué orden se leen. Está diseñado para facilitar la comprensión del stack y asegurar su correcta reproducción.
 
----
+### 🐳 1. `docker-compose.yml`
+- **Rol:** Define los servicios del laboratorio: Grafana, Loki y Promtail.
+- **Lectura:** Es el punto de entrada. Al ejecutar `docker-compose up`, se crean los contenedores y se montan los volúmenes.
 
-## 📊 Dashboard de Logs – Fase 2
+### 🔧 2. `promtail/config.yml`
+- **Rol:** Configura qué archivos de log se recolectan y cómo se etiquetan (`job`, `filename`, etc.).
+- **Lectura:** Promtail lo usa al iniciar. Si está mal configurado, no verás logs en Grafana.
 
-### 🧩 Logs Básicos
+### 🔧 3. `loki/config.yml`
+- **Rol:** Define cómo Loki almacena y organiza los logs recibidos desde Promtail.
+- **Lectura:** Loki lo interpreta al arrancar. Afecta el rendimiento y la retención de logs.
 
-| Panel | Descripción |
-|-------|-------------|
-| 📄 Logs recientes | Tabla con los últimos eventos desde `/var/log/*.log` |
-| 🔍 Logs por nivel | Gráfico con conteo de logs `info`, `warn`, `error` |
-| 📁 Logs por archivo | Pie chart con distribución por archivo (`syslog`, `auth.log`, etc.) |
+### 📁 4. `grafana/provisioning/datasources/datasources.yml`
+- **Rol:** Provisiona automáticamente la conexión de Grafana con Loki como fuente de datos.
+- **Lectura:** Grafana lo lee al iniciar. Si está bien configurado, no necesitas agregar la fuente manualmente.
 
-### 🧠 Logs Extendidos
+### 📁 5. `grafana/provisioning/dashboards/dashboards.yml`
+- **Rol:** Indica a Grafana dónde buscar los dashboards `.json` para cargarlos automáticamente.
+- **Lectura:** Grafana lo interpreta al arrancar. Si el path está bien definido, carga todos los dashboards sin intervención manual.
 
-| Panel | Descripción |
-|-------|-------------|
-| 🧩 Logs por servicio | Pie chart con distribución por `job` |
-| 🔎 Logs que contienen 'failed' | Tabla filtrada por contenido específico |
-| ⏱️ Logs por timestamp | Gráfico de tasa de logs por minuto en la última hora |
+### 📊 6. `grafana/dashboards/fase2/logs-basicos.json`
+- **Rol:** Dashboard básico para visualizar logs recientes, por nivel (`error`, `warn`, `info`) y por archivo.
+- **Lectura:** Grafana lo carga al iniciar, si está referenciado correctamente en `dashboards.yml`.
 
-✅ Ideal para enseñar cómo buscar errores, analizar actividad por servicio, y entender el comportamiento del sistema a través de logs.
+### 📊 7. `grafana/dashboards/fase2/logs-extendidos.json`
+- **Rol:** Dashboard extendido con visualizaciones adicionales:
+  - Logs por servicio (`job`)
+  - Logs que contienen `"failed"`
+  - Frecuencia por timestamp
+  - Paneles tipo `piechart` y `table`
+- **Lectura:** Grafana lo carga junto al básico. Ideal para análisis más profundo y enseñanza didáctica.
 
----
+### 🧹 8. `scripts/reset.sh`
+- **Rol:** Reinicia el entorno: elimina contenedores, redes y volúmenes. Ideal para empezar de cero.
 
-## 🧠 ¿Qué se aprende en esta fase?
-
-- Cómo recolectar logs del sistema con Promtail
-- Cómo enviarlos a Loki y consultarlos desde Grafana
-- Cómo filtrar logs por nivel, archivo, contenido y timestamp
-- Cómo automatizar dashboards de logs
-- Cómo enseñar trazabilidad y debugging en entornos reales
+### 🧪 9. `scripts/setup.sh`
+- **Rol:** Valida que los contenedores estén activos, que los dashboards se hayan cargado, y que Promtail esté recolectando logs.
 
 ---
 
-## 🧯 Troubleshooting documentado
+### ⚠️ Excepción en `.gitignore`
 
-| Problema | Causa | Solución |
-|---------|-------|----------|
-| No aparecen logs | Promtail mal configurado | Verifica `__path__` en `promtail/config.yml` |
-| Dashboard vacío | Datasource no vinculado | Asegúrate de usar `uid: loki` en el dashboard |
-| Error de YAML | Indentación incorrecta | Validar con `yamllint` |
-| Grafana no carga dashboard | Volumen mal montado | Revisa ruta en `dashboards.yml` y `docker-compose.yml` |
+> Para esta ocasión, se realizó una excepción explícita en el archivo `.gitignore` para permitir que los archivos `.json` dentro de `grafana/dashboards/` fueran rastreados por Git y subidos al repositorio.  
+> Esto garantiza que los dashboards básicos y extendidos estén disponibles para cualquier persona que clone el proyecto.
 
----
-
-## ❓ Preguntas frecuentes
-
-**¿Qué logs se recolectan?**  
-Todos los archivos `.log` en `/var/log`, como `syslog`, `auth.log`, `dmesg`, etc.
-
-**¿Puedo agregar logs de contenedores?**  
-Sí, montando `/var/lib/docker/containers` y ajustando `__path__`.
-
-**¿Cómo filtro por nivel?**  
-Usa expresiones como `{job="varlogs"} |= "error"` en Grafana.
-
-**¿Por qué no veo logs?**  
-Verifica que Promtail esté corriendo y que los archivos `.log` existan.
-
----
-
-## 🔮 Extensiones sugeridas
-
-- Fase 3: Exporters como Node Exporter
-- Fase 4: Alertas con Alertmanager
-- Fase 5: Seguridad con Falco
-- Fase 6: Logs de contenedores y servicios personalizados
-
----
-
-## 🔐 Sobre el archivo `.gitignore`
-
-Este repositorio incluye un `.gitignore` reforzado para evitar subir archivos sensibles, temporales o irrelevantes. Está alineado con buenas prácticas DevSecOps y cubre:
-
-```
-# Logs
-*.log
-
-# Docker
-**/docker-compose.override.yml
-**/.env
-**/.env.*
-
-# Grafana
-grafana/data/
-grafana/plugins/
-
-# Loki
-loki/index/
-loki/chunks/
-
-# Promtail
-/tmp/positions.yaml
-
-# System
-.DS_Store
-Thumbs.db
-
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Scripts temporales
-scripts/*.bak
+```gitignore
+# ✅ Incluir dashboards y datasources
+!grafana/dashboards/**/*.json
+!grafana/provisioning/**/*.yml
 ```
 
 ---
 
-## 🌐 Conecta conmigo
+### 🧠 Orden de lectura recomendado
 
-Aprende más sobre DevOps, observabilidad y seguridad en mis redes:
-
-📍 LinkedIn: [https://www.linkedin.com/in/josegaragorry](https://www.linkedin.com/in/josegaragorry)  
-🎬 TikTok: [https://www.tiktok.com/@softtraincorp](https://www.tiktok.com/@softtraincorp)  
-📸 Instagram: [https://www.instagram.com/stclatam/#](https://www.instagram.com/stclatam/#)  
-💬 WhatsApp comunidad: [https://chat.whatsapp.com/ENuRMnZ38fv1pk0mHlSixa](https://chat.whatsapp.com/ENuRMnZ38fv1pk0mHlSixa)
+```plaintext
+1. docker-compose.yml → crea servicios
+2. promtail/config.yml → recolecta logs
+3. loki/config.yml → almacena logs
+4. datasources.yml → Grafana conecta con Loki
+5. dashboards.yml → Grafana busca dashboards
+6. logs-basicos.json → dashboard básico
+7. logs-extendidos.json → dashboard extendido
+8. reset.sh → reinicia entorno
+9. setup.sh → valida estado
+```
 
 ---
 
-🎓 Este laboratorio forma parte de una serie didáctica para dominar observabilidad desde cero.  
-Ideal para formadores, estudiantes y profesionales que buscan enseñar DevOps con impacto real.
+## 📚 Recursos adicionales
 
+- [docs/arquitectura.md](docs/arquitectura.md): explicación técnica del stack
+- [docs/troubleshooting.md](docs/troubleshooting.md): errores comunes y cómo resolverlos
+- [docs/preguntas-frecuentes.md](docs/preguntas-frecuentes.md): dudas frecuentes de alumnos
+
+---
+
+¿Quieres extender el laboratorio con métricas, alertas o trazas? Puedes crear una nueva fase y reutilizar esta estructura como base.
 
